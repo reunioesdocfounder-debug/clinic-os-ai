@@ -90,6 +90,12 @@ export default async function DiagnosticDetailPage({
         >
           Editar métricas financeiras
         </Link>
+        <Link
+          href={`/diagnostics/${diagnostic.id}/products`}
+          className="inline-block rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Editar métricas de produtos
+        </Link>
       </div>
     </main>
   );
