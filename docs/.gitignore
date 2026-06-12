@@ -1,0 +1,29 @@
+# dependencies
+node_modules/
+
+# next
+.next/
+out/
+
+# env
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# vercel
+.vercel/
+
+# supabase local
+.supabase/
+
+# logs
+*.log
+
+# coverage
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
