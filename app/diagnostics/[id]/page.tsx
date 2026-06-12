@@ -77,12 +77,18 @@ export default async function DiagnosticDetailPage({
         ))}
       </dl>
 
-      <div className="mt-6">
+      <div className="mt-6 flex gap-2">
         <Link
           href={`/diagnostics/${diagnostic.id}/commercial`}
           className="inline-block rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
         >
           Editar métricas comerciais
+        </Link>
+        <Link
+          href={`/diagnostics/${diagnostic.id}/financial`}
+          className="inline-block rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Editar métricas financeiras
         </Link>
       </div>
     </main>
