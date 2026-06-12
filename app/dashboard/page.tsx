@@ -31,6 +31,20 @@ export default async function DashboardPage() {
           Nova clínica
         </Link>
       </div>
+      <div className="flex gap-2">
+        <Link
+          href="/diagnostics"
+          className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        >
+          Ver diagnósticos
+        </Link>
+        <Link
+          href="/diagnostics/new"
+          className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Novo diagnóstico
+        </Link>
+      </div>
       <form action={logout}>
         <button
           type="submit"
