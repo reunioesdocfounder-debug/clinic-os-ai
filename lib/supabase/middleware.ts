@@ -29,10 +29,17 @@ export async function updateSession(request: NextRequest) {
 
   // Importante: não executar lógica entre createServerClient e getUser().
   // getUser() renova o token de sessão se necessário.
-  await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  // TODO: quando as rotas autenticadas (app) existirem, redirecionar para
-  // /login se !user e a rota exigir autenticação.
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/dashboard');
+
+  if (!user && isProtectedRoute) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/login';
+    return NextResponse.redirect(url);
+  }
 
   return supabaseResponse;
 }
