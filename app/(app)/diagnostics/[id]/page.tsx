@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { getKpiStatus, type KpiStatus, type PillarScores } from '@/lib/kpis';
 import type { Pillar, Severity } from '@/lib/supabase/database.types';
-import { monthLabel, STATUS_LABELS } from '@/app/diagnostics/constants';
+import { monthLabel, STATUS_LABELS } from '@/app/(app)/diagnostics/constants';
 import { generateDiagnostic } from './actions';
 import { generateActionPlans } from './action-plans/actions';
 

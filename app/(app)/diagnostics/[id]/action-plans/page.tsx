@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { ActionPlanStatus, TaskPriority, TaskStatus, Tables } from '@/lib/supabase/database.types';
-import { monthLabel } from '@/app/diagnostics/constants';
+import { monthLabel } from '@/app/(app)/diagnostics/constants';
 import { generateActionPlans } from './actions';
 
 const ACTION_PLAN_STATUS_LABELS: Record<ActionPlanStatus, string> = {

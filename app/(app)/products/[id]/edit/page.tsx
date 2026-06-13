@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { updateProduct } from '@/app/products/actions';
-import { ProductForm } from '@/app/products/product-form';
+import { updateProduct } from '@/app/(app)/products/actions';
+import { ProductForm } from '@/app/(app)/products/product-form';
 
 export default async function EditProductPage({
   params,

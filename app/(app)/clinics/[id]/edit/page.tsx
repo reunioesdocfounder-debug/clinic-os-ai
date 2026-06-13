@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { updateClinic } from '@/app/clinics/actions';
-import { ClinicForm } from '@/app/clinics/clinic-form';
+import { updateClinic } from '@/app/(app)/clinics/actions';
+import { ClinicForm } from '@/app/(app)/clinics/clinic-form';
 
 export default async function EditClinicPage({
   params,

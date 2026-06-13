@@ -1,8 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { logout } from '@/app/auth/actions';
-import { monthLabel, STATUS_LABELS } from '@/app/diagnostics/constants';
+import { monthLabel, STATUS_LABELS } from '@/app/(app)/diagnostics/constants';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -46,22 +45,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto max-w-5xl space-y-8 p-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Logado como <strong>{user.email}</strong>
-          </p>
-        </div>
-        <form action={logout}>
-          <button
-            type="submit"
-            className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Sair
-          </button>
-        </form>
-      </header>
+      <h1 className="text-2xl font-semibold">Dashboard</h1>
 
       {/* Cards resumidos */}
       <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">

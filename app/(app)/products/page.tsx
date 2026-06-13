@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { CATEGORY_LABELS } from '@/app/products/constants';
+import { CATEGORY_LABELS } from '@/app/(app)/products/constants';
 
 export default async function ProductsPage() {
   const supabase = await createClient();

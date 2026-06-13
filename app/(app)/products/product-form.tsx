@@ -1,5 +1,5 @@
 import type { Tables } from '@/lib/supabase/database.types';
-import { CATEGORIES, CATEGORY_LABELS } from '@/app/products/constants';
+import { CATEGORIES, CATEGORY_LABELS } from '@/app/(app)/products/constants';
 
 type ProductFormValues = Pick<Tables<'products'>, 'name' | 'category' | 'is_active'>;
 

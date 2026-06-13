@@ -3,8 +3,8 @@ import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { calculateProductKpis, rankProducts } from '@/lib/kpis/products';
 import type { ProductMetricsInput } from '@/lib/kpis/types';
-import { monthLabel } from '@/app/diagnostics/constants';
-import { CATEGORY_LABELS } from '@/app/products/constants';
+import { monthLabel } from '@/app/(app)/diagnostics/constants';
+import { CATEGORY_LABELS } from '@/app/(app)/products/constants';
 import { saveProductMetrics } from './actions';
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });

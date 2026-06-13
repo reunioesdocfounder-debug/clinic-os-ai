@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { createProduct } from '@/app/products/actions';
-import { ProductForm } from '@/app/products/product-form';
+import { createProduct } from '@/app/(app)/products/actions';
+import { ProductForm } from '@/app/(app)/products/product-form';
 
 export default async function NewProductPage({
   searchParams,

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { monthLabel, STATUS_LABELS } from '@/app/diagnostics/constants';
+import { monthLabel, STATUS_LABELS } from '@/app/(app)/diagnostics/constants';
 
 export default async function DiagnosticsPage() {
   const supabase = await createClient();

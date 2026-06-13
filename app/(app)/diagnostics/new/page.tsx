@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { createDiagnostic } from '@/app/diagnostics/actions';
-import { MONTHS } from '@/app/diagnostics/constants';
+import { createDiagnostic } from '@/app/(app)/diagnostics/actions';
+import { MONTHS } from '@/app/(app)/diagnostics/constants';
 
 export default async function NewDiagnosticPage({
   searchParams,

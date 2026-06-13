@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
-import { createClinic } from '@/app/clinics/actions';
-import { ClinicForm } from '@/app/clinics/clinic-form';
+import { createClinic } from '@/app/(app)/clinics/actions';
+import { ClinicForm } from '@/app/(app)/clinics/clinic-form';
 
 export default async function NewClinicPage({
   searchParams,
