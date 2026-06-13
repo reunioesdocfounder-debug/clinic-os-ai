@@ -144,6 +144,12 @@ export default async function DiagnosticDetailPage({
         >
           Editar métricas de produtos
         </Link>
+        <Link
+          href={`/diagnostics/${diagnostic.id}/action-plans`}
+          className="inline-block rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        >
+          Ver planos de ação
+        </Link>
         <form action={generateDiagnostic.bind(null, diagnostic.id)}>
           <button
             type="submit"
