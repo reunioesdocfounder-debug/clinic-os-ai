@@ -1,8 +1,10 @@
-import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createClinic } from '@/app/(app)/clinics/actions';
 import { ClinicForm } from '@/app/(app)/clinics/clinic-form';
+import { ButtonLink } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Alert } from '@/components/ui/alert';
 
 export default async function NewClinicPage({
   searchParams,
@@ -20,17 +22,19 @@ export default async function NewClinicPage({
 
   return (
     <main className="mx-auto max-w-lg p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Nova clínica</h1>
-        <Link href="/clinics" className="text-sm text-gray-500 hover:underline">
-          Voltar
-        </Link>
-      </div>
+      <PageHeader
+        title="Nova clínica"
+        actions={
+          <ButtonLink href="/clinics" variant="secondary">
+            Voltar
+          </ButtonLink>
+        }
+      />
 
       {error && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {error}
-        </p>
+        </Alert>
       )}
 
       <ClinicForm action={createClinic} submitLabel="Criar clínica" />

@@ -1,4 +1,6 @@
 import type { Tables } from '@/lib/supabase/database.types';
+import { Label, Input } from '@/components/ui/field';
+import { Button } from '@/components/ui/button';
 
 type CommercialMetricsValues = Pick<
   Tables<'commercial_metrics'>,
@@ -43,28 +45,22 @@ export function CommercialForm({
       <div className="grid grid-cols-2 gap-4">
         {FIELDS.map(({ key, label, step }) => (
           <div key={key}>
-            <label htmlFor={key} className="block text-sm font-medium text-gray-700">
-              {label}
-            </label>
-            <input
+            <Label htmlFor={key}>{label}</Label>
+            <Input
               id={key}
               name={key}
               type="number"
               step={step ?? '1'}
               min={0}
               defaultValue={metrics?.[key] ?? ''}
-              className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
           </div>
         ))}
       </div>
 
-      <button
-        type="submit"
-        className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-      >
+      <Button type="submit" variant="primary">
         Salvar métricas
-      </button>
+      </Button>
     </form>
   );
 }

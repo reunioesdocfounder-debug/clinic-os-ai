@@ -5,6 +5,11 @@ import { calculateProductKpis, rankProducts } from '@/lib/kpis/products';
 import type { ProductMetricsInput } from '@/lib/kpis/types';
 import { monthLabel } from '@/app/(app)/diagnostics/constants';
 import { CATEGORY_LABELS } from '@/app/(app)/products/constants';
+import { Card } from '@/components/ui/card';
+import { ButtonLink, Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Alert } from '@/components/ui/alert';
+import { Label, Input } from '@/components/ui/field';
 import { saveProductMetrics } from './actions';
 
 const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -87,30 +92,26 @@ export default async function DiagnosticProductsPage({
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Métricas de produtos</h1>
-        <Link
-          href={`/diagnostics/${id}`}
-          className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Voltar
-        </Link>
-      </div>
-
-      <p className="mb-4 text-sm text-gray-500">
-        {clinic?.name ?? 'Clínica'} — {monthLabel(diagnostic.period_month)} / {diagnostic.period_year}
-      </p>
+      <PageHeader
+        title="Métricas de produtos"
+        subtitle={`${clinic?.name ?? 'Clínica'} — ${monthLabel(diagnostic.period_month)} / ${diagnostic.period_year}`}
+        actions={
+          <ButtonLink href={`/diagnostics/${id}`} variant="secondary">
+            Voltar
+          </ButtonLink>
+        }
+      />
 
       {errorMessage && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {errorMessage}
-        </p>
+        </Alert>
       )}
 
       {(!products || products.length === 0) && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Nenhum produto ativo cadastrado para esta clínica.{' '}
-          <Link href="/products/new" className="text-blue-600 hover:underline">
+          <Link href="/products/new" className="text-accent hover:underline">
             Cadastrar produto
           </Link>
         </p>
@@ -124,102 +125,74 @@ export default async function DiagnosticProductsPage({
             {products.map((product) => {
               const metrics = metricsByProduct.get(product.id);
               return (
-                <fieldset key={product.id} className="rounded border border-gray-200 p-4">
+                <fieldset key={product.id} className="rounded-3xl border border-border bg-surface p-4 shadow-card">
                   <legend className="px-1 text-sm font-semibold">
                     {product.name}{' '}
-                    <span className="text-xs font-normal text-gray-500">
+                    <span className="text-xs font-normal text-muted">
                       ({CATEGORY_LABELS[product.category]})
                     </span>
                   </legend>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label
-                        htmlFor={`quantity_sold__${product.id}`}
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Quantidade vendida
-                      </label>
-                      <input
+                      <Label htmlFor={`quantity_sold__${product.id}`}>Quantidade vendida</Label>
+                      <Input
                         id={`quantity_sold__${product.id}`}
                         name={`quantity_sold__${product.id}`}
                         type="number"
                         step="1"
                         min={0}
                         defaultValue={metrics?.quantity_sold ?? ''}
-                        className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label
-                        htmlFor={`average_price__${product.id}`}
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Preço médio (R$)
-                      </label>
-                      <input
+                      <Label htmlFor={`average_price__${product.id}`}>Preço médio (R$)</Label>
+                      <Input
                         id={`average_price__${product.id}`}
                         name={`average_price__${product.id}`}
                         type="number"
                         step="0.01"
                         min={0}
                         defaultValue={metrics?.average_price ?? ''}
-                        className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label
-                        htmlFor={`direct_cost_per_unit__${product.id}`}
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Custo direto por unidade (R$)
-                      </label>
-                      <input
+                      <Label htmlFor={`direct_cost_per_unit__${product.id}`}>Custo direto por unidade (R$)</Label>
+                      <Input
                         id={`direct_cost_per_unit__${product.id}`}
                         name={`direct_cost_per_unit__${product.id}`}
                         type="number"
                         step="0.01"
                         min={0}
                         defaultValue={metrics?.direct_cost_per_unit ?? ''}
-                        className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label
-                        htmlFor={`commission_per_unit__${product.id}`}
-                        className="block text-sm font-medium text-gray-700"
-                      >
-                        Comissão por unidade (R$)
-                      </label>
-                      <input
+                      <Label htmlFor={`commission_per_unit__${product.id}`}>Comissão por unidade (R$)</Label>
+                      <Input
                         id={`commission_per_unit__${product.id}`}
                         name={`commission_per_unit__${product.id}`}
                         type="number"
                         step="0.01"
                         min={0}
                         defaultValue={metrics?.commission_per_unit ?? ''}
-                        className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                       />
                     </div>
 
                     <div>
-                      <label
-                        htmlFor={`team_time_minutes_per_unit__${product.id}`}
-                        className="block text-sm font-medium text-gray-700"
-                      >
+                      <Label htmlFor={`team_time_minutes_per_unit__${product.id}`}>
                         Tempo de equipe por unidade (min)
-                      </label>
-                      <input
+                      </Label>
+                      <Input
                         id={`team_time_minutes_per_unit__${product.id}`}
                         name={`team_time_minutes_per_unit__${product.id}`}
                         type="number"
                         step="0.01"
                         min={0}
                         defaultValue={metrics?.team_time_minutes_per_unit ?? ''}
-                        className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
                       />
                     </div>
                   </div>
@@ -227,18 +200,15 @@ export default async function DiagnosticProductsPage({
               );
             })}
 
-            <button
-              type="submit"
-              className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
+            <Button type="submit" variant="primary">
               Salvar métricas de produtos
-            </button>
+            </Button>
           </form>
 
-          <h2 className="mt-8 mb-3 text-lg font-semibold">KPIs por produto</h2>
-          <div className="overflow-x-auto rounded border border-gray-200">
+          <h2 className="mt-8 mb-3 text-lg font-semibold tracking-tight">KPIs por produto</h2>
+          <Card padding="p-0" className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 text-left text-gray-500">
+              <thead className="bg-surface-hover text-left text-muted">
                 <tr>
                   <th className="p-2">Produto</th>
                   <th className="p-2">Receita</th>
@@ -248,7 +218,7 @@ export default async function DiagnosticProductsPage({
                   <th className="p-2">Tempo total de equipe</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-border">
                 {products.map((product) => {
                   const kpis = kpisByProduct.get(product.id)!;
                   return (
@@ -264,9 +234,9 @@ export default async function DiagnosticProductsPage({
                 })}
               </tbody>
             </table>
-          </div>
+          </Card>
 
-          <h2 className="mt-8 mb-3 text-lg font-semibold">Ranking por lucro bruto</h2>
+          <h2 className="mt-8 mb-3 text-lg font-semibold tracking-tight">Ranking por lucro bruto</h2>
           <ol className="space-y-1 text-sm">
             {ranking.map((kpis) => (
               <li key={kpis.product_id}>

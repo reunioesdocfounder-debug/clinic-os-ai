@@ -1,6 +1,7 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
+import { ButtonLink } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
 
 export default async function ClinicDetailPage({
   params,
@@ -28,39 +29,35 @@ export default async function ClinicDetailPage({
 
   return (
     <main className="mx-auto max-w-lg p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{clinic.name}</h1>
-        <div className="flex gap-2">
-          <Link
-            href={`/clinics/${clinic.id}/edit`}
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
-            Editar
-          </Link>
-          <Link
-            href="/clinics"
-            className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-          >
-            Voltar
-          </Link>
-        </div>
-      </div>
+      <PageHeader
+        title={clinic.name}
+        actions={
+          <>
+            <ButtonLink href={`/clinics/${clinic.id}/edit`} variant="primary">
+              Editar
+            </ButtonLink>
+            <ButtonLink href="/clinics" variant="secondary">
+              Voltar
+            </ButtonLink>
+          </>
+        }
+      />
 
       <dl className="space-y-3 text-sm">
         <div>
-          <dt className="font-medium text-gray-500">Cidade / Estado</dt>
+          <dt className="font-medium text-muted">Cidade / Estado</dt>
           <dd>{[clinic.city, clinic.state].filter(Boolean).join(' - ') || '-'}</dd>
         </div>
         <div>
-          <dt className="font-medium text-gray-500">Modelo de negócio</dt>
+          <dt className="font-medium text-muted">Modelo de negócio</dt>
           <dd>{clinic.business_model ?? '-'}</dd>
         </div>
         <div>
-          <dt className="font-medium text-gray-500">Anos em operação</dt>
+          <dt className="font-medium text-muted">Anos em operação</dt>
           <dd>{clinic.years_in_operation ?? '-'}</dd>
         </div>
         <div>
-          <dt className="font-medium text-gray-500">Especialidades</dt>
+          <dt className="font-medium text-muted">Especialidades</dt>
           <dd>{clinic.specialties.length > 0 ? clinic.specialties.join(', ') : '-'}</dd>
         </div>
       </dl>

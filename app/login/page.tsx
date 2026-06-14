@@ -1,6 +1,10 @@
 import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { login, signup } from '@/app/auth/actions';
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert } from '@/components/ui/alert';
+import { Label, Input } from '@/components/ui/field';
 
 export default async function LoginPage({
   searchParams,
@@ -20,65 +24,36 @@ export default async function LoginPage({
     <main className="flex min-h-screen flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold">ClinicOS AI</h1>
-          <p className="mt-1 text-sm text-gray-500">Entre com seu email e senha.</p>
+          <h1 className="text-2xl font-semibold tracking-tight">ClinicOS AI</h1>
+          <p className="mt-1 text-sm text-muted">Entre com seu email e senha.</p>
         </div>
 
-        {error && (
-          <p className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
-            {error}
-          </p>
-        )}
+        {error && <Alert tone="error">{error}</Alert>}
 
-        {message && (
-          <p className="rounded border border-green-200 bg-green-50 p-3 text-sm text-green-700">
-            {message}
-          </p>
-        )}
+        {message && <Alert tone="success">{message}</Alert>}
 
-        <form className="space-y-4">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-              Email
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-            />
-          </div>
+        <Card>
+          <form className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" required />
+            </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Senha
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              minLength={6}
-              className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-            />
-          </div>
+            <div>
+              <Label htmlFor="password">Senha</Label>
+              <Input id="password" name="password" type="password" required minLength={6} />
+            </div>
 
-          <div className="flex gap-2">
-            <button
-              formAction={login}
-              className="flex-1 rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-            >
-              Entrar
-            </button>
-            <button
-              formAction={signup}
-              className="flex-1 rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-            >
-              Criar conta
-            </button>
-          </div>
-        </form>
+            <div className="flex gap-2">
+              <Button formAction={login} variant="primary" className="flex-1">
+                Entrar
+              </Button>
+              <Button formAction={signup} variant="secondary" className="flex-1">
+                Criar conta
+              </Button>
+            </div>
+          </form>
+        </Card>
       </div>
     </main>
   );

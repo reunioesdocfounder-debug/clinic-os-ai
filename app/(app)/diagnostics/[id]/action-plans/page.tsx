@@ -1,8 +1,12 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { ActionPlanStatus, TaskPriority, TaskStatus, Tables } from '@/lib/supabase/database.types';
 import { monthLabel } from '@/app/(app)/diagnostics/constants';
+import { Card } from '@/components/ui/card';
+import { ButtonLink, Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Alert } from '@/components/ui/alert';
+import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { generateActionPlans } from './actions';
 
 const ACTION_PLAN_STATUS_LABELS: Record<ActionPlanStatus, string> = {
@@ -26,11 +30,11 @@ const TASK_PRIORITY_LABELS: Record<TaskPriority, string> = {
   low: 'Baixa',
 };
 
-const TASK_PRIORITY_STYLES: Record<TaskPriority, string> = {
-  urgent: 'bg-red-100 text-red-800',
-  high: 'bg-orange-100 text-orange-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  low: 'bg-gray-100 text-gray-700',
+const TASK_PRIORITY_TONES: Record<TaskPriority, BadgeTone> = {
+  urgent: 'red',
+  high: 'orange',
+  medium: 'yellow',
+  low: 'gray',
 };
 
 export default async function ActionPlansPage({
@@ -112,63 +116,54 @@ export default async function ActionPlansPage({
 
   return (
     <main className="mx-auto max-w-2xl p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Planos de ação</h1>
-        <Link
-          href={`/diagnostics/${id}`}
-          className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Voltar
-        </Link>
-      </div>
-
-      <p className="mb-4 text-sm text-gray-500">
-        {clinic?.name ?? 'Clínica'} — {monthLabel(diagnostic.period_month)} / {diagnostic.period_year}
-      </p>
+      <PageHeader
+        title="Planos de ação"
+        subtitle={`${clinic?.name ?? 'Clínica'} — ${monthLabel(diagnostic.period_month)} / ${diagnostic.period_year}`}
+        actions={
+          <ButtonLink href={`/diagnostics/${id}`} variant="secondary">
+            Voltar
+          </ButtonLink>
+        }
+      />
 
       {errorMessage && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {errorMessage}
-        </p>
+        </Alert>
       )}
 
       <form action={generateActionPlans.bind(null, id)} className="mb-6">
-        <button
-          type="submit"
-          className="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-        >
+        <Button type="submit" variant="primary">
           Gerar planos de ação
-        </button>
+        </Button>
       </form>
 
       {(!plans || plans.length === 0) ? (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Nenhum plano de ação gerado ainda. Gere o diagnóstico para identificar os achados críticos/altos e
           clique em &ldquo;Gerar planos de ação&rdquo;.
         </p>
       ) : (
         <div className="space-y-6">
           {plans.map((plan) => (
-            <section key={plan.id} className="rounded border border-gray-200 p-4">
+            <Card key={plan.id} padding="p-4">
               <div className="mb-2 flex items-center justify-between gap-2">
-                <h2 className="text-lg font-semibold">{plan.title}</h2>
-                <span className="rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
-                  {ACTION_PLAN_STATUS_LABELS[plan.status]}
-                </span>
+                <h2 className="text-lg font-semibold tracking-tight">{plan.title}</h2>
+                <Badge tone="blue">{ACTION_PLAN_STATUS_LABELS[plan.status]}</Badge>
               </div>
 
-              {plan.description && <p className="mb-2 text-sm text-gray-700">{plan.description}</p>}
+              {plan.description && <p className="mb-2 text-sm text-foreground">{plan.description}</p>}
 
               <dl className="mb-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
                 {plan.objective && (
                   <div>
-                    <dt className="font-medium text-gray-500">Objetivo</dt>
+                    <dt className="font-medium text-muted">Objetivo</dt>
                     <dd>{plan.objective}</dd>
                   </div>
                 )}
                 {plan.expected_result && (
                   <div>
-                    <dt className="font-medium text-gray-500">Resultado esperado</dt>
+                    <dt className="font-medium text-muted">Resultado esperado</dt>
                     <dd>{plan.expected_result}</dd>
                   </div>
                 )}
@@ -176,7 +171,7 @@ export default async function ActionPlansPage({
 
               <div className="space-y-3">
                 {(phasesByPlan.get(plan.id) ?? []).map((phase) => (
-                  <div key={phase.id} className="rounded border border-gray-100 bg-gray-50 p-3">
+                  <div key={phase.id} className="rounded-xl border border-border bg-surface-hover p-3">
                     <h3 className="mb-2 text-sm font-semibold">{phase.title}</h3>
                     <ul className="space-y-2">
                       {(tasksByPhase.get(phase.id) ?? []).map((task) => (
@@ -184,16 +179,14 @@ export default async function ActionPlansPage({
                           <div>
                             <p>{task.title}</p>
                             {task.expected_kpi && (
-                              <p className="text-xs text-gray-500">KPI: {task.expected_kpi}</p>
+                              <p className="text-xs text-muted">KPI: {task.expected_kpi}</p>
                             )}
                           </div>
                           <div className="flex flex-shrink-0 gap-1">
-                            <span className={`rounded px-2 py-0.5 text-xs font-medium ${TASK_PRIORITY_STYLES[task.priority]}`}>
+                            <Badge tone={TASK_PRIORITY_TONES[task.priority]}>
                               {TASK_PRIORITY_LABELS[task.priority]}
-                            </span>
-                            <span className="rounded bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700">
-                              {TASK_STATUS_LABELS[task.status]}
-                            </span>
+                            </Badge>
+                            <Badge tone="gray">{TASK_STATUS_LABELS[task.status]}</Badge>
                           </div>
                         </li>
                       ))}
@@ -201,7 +194,7 @@ export default async function ActionPlansPage({
                   </div>
                 ))}
               </div>
-            </section>
+            </Card>
           ))}
         </div>
       )}

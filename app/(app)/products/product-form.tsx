@@ -1,5 +1,7 @@
 import type { Tables } from '@/lib/supabase/database.types';
 import { CATEGORIES, CATEGORY_LABELS } from '@/app/(app)/products/constants';
+import { Label, Input, Select, Checkbox } from '@/components/ui/field';
+import { Button } from '@/components/ui/button';
 
 type ProductFormValues = Pick<Tables<'products'>, 'name' | 'category' | 'is_active'>;
 
@@ -18,75 +20,41 @@ export function ProductForm({
     <form action={action} className="space-y-4">
       {clinics && (
         <div>
-          <label htmlFor="clinic_id" className="block text-sm font-medium text-gray-700">
-            Clínica *
-          </label>
-          <select
-            id="clinic_id"
-            name="clinic_id"
-            required
-            className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-          >
+          <Label htmlFor="clinic_id">Clínica *</Label>
+          <Select id="clinic_id" name="clinic_id" required>
             {clinics.map((clinic) => (
               <option key={clinic.id} value={clinic.id}>
                 {clinic.name}
               </option>
             ))}
-          </select>
+          </Select>
         </div>
       )}
 
       <div>
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          Nome *
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          required
-          defaultValue={product?.name}
-          className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-        />
+        <Label htmlFor="name">Nome *</Label>
+        <Input id="name" name="name" type="text" required defaultValue={product?.name} />
       </div>
 
       <div>
-        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-          Categoria
-        </label>
-        <select
-          id="category"
-          name="category"
-          defaultValue={product?.category ?? 'outro'}
-          className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-        >
+        <Label htmlFor="category">Categoria</Label>
+        <Select id="category" name="category" defaultValue={product?.category ?? 'outro'}>
           {CATEGORIES.map((category) => (
             <option key={category} value={category}>
               {CATEGORY_LABELS[category]}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
 
       <div className="flex items-center gap-2">
-        <input
-          id="is_active"
-          name="is_active"
-          type="checkbox"
-          defaultChecked={product?.is_active ?? true}
-          className="h-4 w-4 rounded border-gray-300"
-        />
-        <label htmlFor="is_active" className="text-sm font-medium text-gray-700">
-          Produto ativo
-        </label>
+        <Checkbox id="is_active" name="is_active" defaultChecked={product?.is_active ?? true} />
+        <Label htmlFor="is_active">Produto ativo</Label>
       </div>
 
-      <button
-        type="submit"
-        className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-      >
+      <Button type="submit" variant="primary">
         {submitLabel}
-      </button>
+      </Button>
     </form>
   );
 }

@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createProduct } from '@/app/(app)/products/actions';
 import { ProductForm } from '@/app/(app)/products/product-form';
+import { ButtonLink } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Alert } from '@/components/ui/alert';
 
 export default async function NewProductPage({
   searchParams,
@@ -25,29 +28,31 @@ export default async function NewProductPage({
 
   return (
     <main className="mx-auto max-w-lg p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Novo produto</h1>
-        <Link href="/products" className="text-sm text-gray-500 hover:underline">
-          Voltar
-        </Link>
-      </div>
+      <PageHeader
+        title="Novo produto"
+        actions={
+          <ButtonLink href="/products" variant="secondary">
+            Voltar
+          </ButtonLink>
+        }
+      />
 
       {error && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {error}
-        </p>
+        </Alert>
       )}
 
       {clinicsError && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {clinicsError.message}
-        </p>
+        </Alert>
       )}
 
       {!clinicsError && clinics?.length === 0 && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Você ainda não tem clínicas cadastradas.{' '}
-          <Link href="/clinics/new" className="text-blue-600 hover:underline">
+          <Link href="/clinics/new" className="text-accent hover:underline">
             Cadastre uma clínica
           </Link>{' '}
           antes de criar um produto.

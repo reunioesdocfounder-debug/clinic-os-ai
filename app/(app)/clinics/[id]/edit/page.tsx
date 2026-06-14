@@ -1,8 +1,10 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { updateClinic } from '@/app/(app)/clinics/actions';
 import { ClinicForm } from '@/app/(app)/clinics/clinic-form';
+import { ButtonLink } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Alert } from '@/components/ui/alert';
 
 export default async function EditClinicPage({
   params,
@@ -33,17 +35,19 @@ export default async function EditClinicPage({
 
   return (
     <main className="mx-auto max-w-lg p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Editar clínica</h1>
-        <Link href={`/clinics/${id}`} className="text-sm text-gray-500 hover:underline">
-          Voltar
-        </Link>
-      </div>
+      <PageHeader
+        title="Editar clínica"
+        actions={
+          <ButtonLink href={`/clinics/${id}`} variant="secondary">
+            Voltar
+          </ButtonLink>
+        }
+      />
 
       {errorMessage && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {errorMessage}
-        </p>
+        </Alert>
       )}
 
       <ClinicForm clinic={clinic} action={updateClinic.bind(null, id)} submitLabel="Salvar alterações" />

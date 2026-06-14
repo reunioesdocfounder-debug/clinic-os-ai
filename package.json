@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "check-supabase": "tsx scripts/check-supabase-connection.ts"
+    "check-supabase": "tsx scripts/check-supabase-connection.ts",
+    "confirm-user": "tsx scripts/confirm-user.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

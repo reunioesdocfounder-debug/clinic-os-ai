@@ -1,8 +1,10 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { updateProduct } from '@/app/(app)/products/actions';
 import { ProductForm } from '@/app/(app)/products/product-form';
+import { ButtonLink } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Alert } from '@/components/ui/alert';
 
 export default async function EditProductPage({
   params,
@@ -33,17 +35,19 @@ export default async function EditProductPage({
 
   return (
     <main className="mx-auto max-w-lg p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Editar produto</h1>
-        <Link href="/products" className="text-sm text-gray-500 hover:underline">
-          Voltar
-        </Link>
-      </div>
+      <PageHeader
+        title="Editar produto"
+        actions={
+          <ButtonLink href="/products" variant="secondary">
+            Voltar
+          </ButtonLink>
+        }
+      />
 
       {errorMessage && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {errorMessage}
-        </p>
+        </Alert>
       )}
 
       <ProductForm

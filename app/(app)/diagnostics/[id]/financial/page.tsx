@@ -1,8 +1,10 @@
-import Link from 'next/link';
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { calculateFinancialKpis } from '@/lib/kpis/financial';
 import type { FinancialMetricsInput, FinancialKpis } from '@/lib/kpis/types';
+import { ButtonLink } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Alert } from '@/components/ui/alert';
 import { saveFinancialMetrics } from './actions';
 import { FinancialForm } from './financial-form';
 
@@ -83,41 +85,40 @@ export default async function FinancialMetricsPage({
 
   return (
     <main className="mx-auto max-w-lg p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Métricas financeiras</h1>
-        <Link
-          href={`/diagnostics/${id}`}
-          className="rounded border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-        >
-          Voltar
-        </Link>
-      </div>
+      <PageHeader
+        title="Métricas financeiras"
+        actions={
+          <ButtonLink href={`/diagnostics/${id}`} variant="secondary">
+            Voltar
+          </ButtonLink>
+        }
+      />
 
       {errorMessage && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {errorMessage}
-        </p>
+        </Alert>
       )}
 
-      <p className="mb-4 rounded border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">
+      <Alert tone="info" className="mb-4">
         <strong>Atenção:</strong> &quot;Custos diretos&quot; não deve incluir comissões
         comerciais sobre vendas. Lance as comissões separadamente no campo &quot;Comissões&quot;
         — elas são tratadas como despesa operacional no cálculo do EBITDA.
-      </p>
+      </Alert>
 
       <FinancialForm metrics={metrics} action={saveFinancialMetrics.bind(null, id)} />
 
-      <h2 className="mt-8 mb-3 text-lg font-semibold">KPIs calculados</h2>
+      <h2 className="mt-8 mb-3 text-lg font-semibold tracking-tight">KPIs calculados</h2>
       <dl className="grid grid-cols-2 gap-4 text-sm">
         {CURRENCY_KPI_FIELDS.map(({ key, label }) => (
           <div key={key}>
-            <dt className="font-medium text-gray-500">{label}</dt>
+            <dt className="font-medium text-muted">{label}</dt>
             <dd>{formatCurrency(kpis[key])}</dd>
           </div>
         ))}
         {PERCENT_KPI_FIELDS.map(({ key, label }) => (
           <div key={key}>
-            <dt className="font-medium text-gray-500">{label}</dt>
+            <dt className="font-medium text-muted">{label}</dt>
             <dd>{formatPercent(kpis[key])}</dd>
           </div>
         ))}

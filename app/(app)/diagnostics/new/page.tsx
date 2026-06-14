@@ -3,6 +3,10 @@ import { redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { createDiagnostic } from '@/app/(app)/diagnostics/actions';
 import { MONTHS } from '@/app/(app)/diagnostics/constants';
+import { ButtonLink, Button } from '@/components/ui/button';
+import { PageHeader } from '@/components/ui/page-header';
+import { Alert } from '@/components/ui/alert';
+import { Label, Input, Select } from '@/components/ui/field';
 
 export default async function NewDiagnosticPage({
   searchParams,
@@ -27,29 +31,31 @@ export default async function NewDiagnosticPage({
 
   return (
     <main className="mx-auto max-w-lg p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Novo diagnóstico</h1>
-        <Link href="/diagnostics" className="text-sm text-gray-500 hover:underline">
-          Voltar
-        </Link>
-      </div>
+      <PageHeader
+        title="Novo diagnóstico"
+        actions={
+          <ButtonLink href="/diagnostics" variant="secondary">
+            Voltar
+          </ButtonLink>
+        }
+      />
 
       {error && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {error}
-        </p>
+        </Alert>
       )}
 
       {clinicsError && (
-        <p className="mb-4 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+        <Alert tone="error" className="mb-4">
           {clinicsError.message}
-        </p>
+        </Alert>
       )}
 
       {!clinicsError && clinics?.length === 0 && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted">
           Você ainda não tem clínicas cadastradas.{' '}
-          <Link href="/clinics/new" className="text-blue-600 hover:underline">
+          <Link href="/clinics/new" className="text-accent hover:underline">
             Cadastre uma clínica
           </Link>{' '}
           antes de criar um diagnóstico.
@@ -59,48 +65,31 @@ export default async function NewDiagnosticPage({
       {!clinicsError && clinics && clinics.length > 0 && (
         <form action={createDiagnostic} className="space-y-4">
           <div>
-            <label htmlFor="clinic_id" className="block text-sm font-medium text-gray-700">
-              Clínica *
-            </label>
-            <select
-              id="clinic_id"
-              name="clinic_id"
-              required
-              className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-            >
+            <Label htmlFor="clinic_id">Clínica *</Label>
+            <Select id="clinic_id" name="clinic_id" required>
               {clinics.map((clinic) => (
                 <option key={clinic.id} value={clinic.id}>
                   {clinic.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="period_month" className="block text-sm font-medium text-gray-700">
-                Mês *
-              </label>
-              <select
-                id="period_month"
-                name="period_month"
-                required
-                defaultValue={now.getMonth() + 1}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-              >
+              <Label htmlFor="period_month">Mês *</Label>
+              <Select id="period_month" name="period_month" required defaultValue={now.getMonth() + 1}>
                 {MONTHS.map((month) => (
                   <option key={month.value} value={month.value}>
                     {month.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             <div>
-              <label htmlFor="period_year" className="block text-sm font-medium text-gray-700">
-                Ano *
-              </label>
-              <input
+              <Label htmlFor="period_year">Ano *</Label>
+              <Input
                 id="period_year"
                 name="period_year"
                 type="number"
@@ -108,17 +97,13 @@ export default async function NewDiagnosticPage({
                 min={2000}
                 max={2100}
                 defaultValue={now.getFullYear()}
-                className="mt-1 block w-full rounded border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
               />
             </div>
           </div>
 
-          <button
-            type="submit"
-            className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-          >
+          <Button type="submit" variant="primary">
             Criar diagnóstico
-          </button>
+          </Button>
         </form>
       )}
     </main>
