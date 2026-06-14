@@ -16,7 +16,7 @@ export async function generateActionPlans(diagnosticId: string) {
 
   const { data: findings, error: findingsError } = await supabase
     .from('diagnostic_findings')
-    .select('title, severity')
+    .select('evidence, severity')
     .eq('diagnostic_id', diagnosticId);
 
   if (findingsError) {
