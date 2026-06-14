@@ -91,6 +91,7 @@ export async function buildDiagnostic(
     commercial: {
       ...commercialKpis,
       average_response_time_minutes: commercialInput.average_response_time_minutes,
+      average_days_until_appointment: commercialInput.average_days_until_appointment,
     },
     financial: {
       net_margin: financialKpis.net_margin,

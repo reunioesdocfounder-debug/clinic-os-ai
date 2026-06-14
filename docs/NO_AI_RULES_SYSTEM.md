@@ -533,12 +533,15 @@ Reavaliar quando **qualquer um** destes ocorrer:
 
 ### Fase 3 — Validar extensibilidade com regra(s) nova(s)
 
-- Adicionar **RULE-007** (pilar Operação — ex.: produtividade da equipe
-  usando `clinic_team` + `total_team_time_minutes`, conforme nota da seção
-  3.5 de `docs/RULES_ENGINE.md`) usando **apenas** o fluxo da seção 3.1.
-- Validar que nenhum arquivo do "motor" (`evaluator.ts`, `scoring.ts`,
-  `plan-generator.ts`) precisou ser tocado — só dados + 1 calculador de
-  impacto (Tier 2) se necessário.
+- **RULE-007** (pilar Operação, `average_days_until_appointment > 10`, ver
+  seção 3.5 de `docs/RULES_ENGINE.md`) já foi adicionada via
+  `RULE_DEFINITIONS` seguindo **apenas** o fluxo da seção 3.1, validando esta
+  fase: nenhum arquivo do "motor" (`evaluator.ts`, `scoring.ts`,
+  `plan-generator.ts`) precisou ser tocado — só dados (`RULE_DEFINITIONS`,
+  `KPI_DEFINITIONS`) + 1 calculador de impacto (Tier 2,
+  `scheduleDelayRevenue`).
+- Caso seja necessário validar a extensibilidade novamente no futuro (ex.:
+  RULE-008), repetir o mesmo fluxo da seção 3.1.
 
 ### Fase 4 — (Condicional) Migração para Supabase
 

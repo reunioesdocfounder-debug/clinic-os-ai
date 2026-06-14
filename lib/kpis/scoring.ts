@@ -35,16 +35,31 @@ export const SEVERITY_WEIGHTS: Record<Severity, number> = {
 export interface PillarScoreInputs {
   commercial: CommercialKpis & {
     average_response_time_minutes: number | null;
+    average_days_until_appointment: number | null;
   };
   financial: Pick<FinancialKpis, 'net_margin' | 'payroll_percentage'>;
+}
+
+/**
+ * Score (0-100) do pilar Operação a partir de `average_days_until_appointment`
+ * (RULES_ENGINE.md secao 3.5 / RULE-007), em faixas fixas:
+ * <= 3 dias: 100; 4-7 dias: 80; 8-10 dias: 60; > 10 dias: 30.
+ */
+function operationScoreFromAvgDaysUntilAppointment(days: number | null): number | null {
+  if (days === null) return null;
+  if (days <= 3) return 100;
+  if (days <= 7) return 80;
+  if (days <= 10) return 60;
+  return 30;
 }
 
 /**
  * Calcula os scores 0-100 por pilar a partir dos KPIs já computados,
  * conforme o mapeamento KPI -> pilar definido pelas regras de diagnóstico
  * (RULES_ENGINE.md secao 3). Cada score é a média dos scores de benchmark
- * dos KPIs mapeados para o pilar; pilares sem KPI mapeado (operation, no
- * MVP) retornam `null`.
+ * dos KPIs mapeados para o pilar. `operation_score` usa um benchmark
+ * dedicado em faixas fixas sobre `average_days_until_appointment`
+ * (RULES_ENGINE.md secao 3.5).
  */
 export function calculatePillarScores(inputs: PillarScoreInputs): PillarScores {
   const commercialScore = average([
@@ -65,13 +80,16 @@ export function calculatePillarScores(inputs: PillarScoreInputs): PillarScores {
     scoreFromBenchmark(inputs.commercial.referral_rate, 'referral_rate'),
   ]);
 
+  const operationScore = operationScoreFromAvgDaysUntilAppointment(
+    inputs.commercial.average_days_until_appointment,
+  );
+
   return {
     commercial_score: commercialScore === null ? null : roundTo(commercialScore, 2),
     financial_score: financialScore === null ? null : roundTo(financialScore, 2),
     retention_score: retentionScore === null ? null : roundTo(retentionScore, 2),
     marketing_score: marketingScore === null ? null : roundTo(marketingScore, 2),
-    // operation_score: sem KPI mapeado no MVP (RULES_ENGINE.md secao 3.5)
-    operation_score: null,
+    operation_score: operationScore,
   };
 }
 

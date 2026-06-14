@@ -227,18 +227,18 @@ A implementação dessa interpolação é a função `scoreFromBenchmark` em
 
 ## 2.5 Score por pilar
 
-`commercial_score`, `financial_score`, `retention_score`, `marketing_score` e
-`operation_score` são a **média aritmética dos scores dos KPIs daquele
-pilar** (mapeamento de pilar na seção 3).
+`commercial_score`, `financial_score`, `retention_score` e `marketing_score`
+são a **média aritmética dos scores dos KPIs daquele pilar** (mapeamento de
+pilar na seção 3). `operation_score` é calculado de forma direta a partir de
+`average_days_until_appointment`, usando o benchmark dedicado em faixas fixas
+da seção 3.5 (não a interpolação linear genérica da seção 2.1).
 
-No MVP, os pilares **Retenção**, **Marketing** e **Operação** possuem apenas
-1 KPI mapeado cada (`renewal_rate`, `referral_rate` e nenhum,
-respectivamente — ver nota na seção 3.5). Quando um pilar não possui nenhum
-KPI calculável (dados insuficientes), seu score deve ser tratado como `null`
-e excluído do cálculo de `general_score` (redistribuindo o peso
-proporcionalmente entre os pilares calculados), até que o V2 adicione
-métricas operacionais (ex.: produtividade da equipe via `clinic_team` +
-`product_metrics`).
+No MVP, os pilares **Retenção** e **Marketing** possuem apenas 1 KPI mapeado
+cada (`renewal_rate` e `referral_rate`, respectivamente) e **Operação**
+possui 1 KPI mapeado (`average_days_until_appointment`, seção 3.5). Quando um
+pilar não possui nenhum KPI calculável (dados insuficientes), seu score deve
+ser tratado como `null` e excluído do cálculo de `general_score`
+(redistribuindo o peso proporcionalmente entre os pilares calculados).
 
 ---
 
@@ -316,16 +316,37 @@ threshold e o KPI de origem (formato sugerido em 3.6).
 
 ## 3.5 Pilar Operação (`pillar = 'operation'`)
 
-Nenhuma regra do MVP (PRD §8) mapeia para o pilar Operação. As tabelas
-`commercial_metrics`, `financial_metrics` e `product_metrics` não contêm,
-isoladamente, um KPI de produtividade operacional comparável entre clínicas
-(ex.: pacientes atendidos por membro de equipe), pois isso requer combinar
-`clinic_team` (snapshot da equipe) com os volumes do diagnóstico.
+### RULE-007 — Agenda Muito Distante
 
-**Para o MVP:** `operation_score` permanece `null` (ver seção 2.5) até que
-uma regra operacional seja definida em uma revisão futura deste documento
-(ex.: RULE-007, candidata a usar `total_team_time_minutes` vs. capacidade da
-equipe).
+- **Condição:** `average_days_until_appointment > 10`
+- **Severidade:** `high`
+- **Título:** "Agenda muito distante"
+- **Descrição:** "O tempo médio entre agendamento e consulta está acima do
+  recomendado, aumentando o risco de esfriamento do lead, no-show e perda
+  para concorrentes."
+- **Indicador:** 🔴
+
+### `operation_score` (benchmark dedicado)
+
+`operation_score` é calculado diretamente a partir de
+`average_days_until_appointment`, em **faixas fixas** (sem interpolação
+linear entre os pontos, diferente da seção 2.4):
+
+| `average_days_until_appointment` | `operation_score` |
+| --- | ---: |
+| `≤ 3 dias` | 100 |
+| `4–7 dias` | 80 |
+| `8–10 dias` | 60 |
+| `> 10 dias` | 30 |
+
+Implementação: `operationScoreFromAvgDaysUntilAppointment` em
+`lib/kpis/scoring.ts`, chamada por `calculatePillarScores` (seção 2.5). A
+faixa `> 10 dias` é consistente com o threshold de RULE-007 acima.
+
+> **Nota (futuro, fora do MVP):** uma versão mais completa de
+> `operation_score` poderia combinar `average_days_until_appointment` com
+> produtividade da equipe (`clinic_team` + `total_team_time_minutes` de
+> `product_metrics`). Não bloqueia o cálculo atual.
 
 ## 3.6 Formato sugerido para `evidence` (jsonb)
 
@@ -351,6 +372,7 @@ equipe).
 | RULE-004 — Estrutura possivelmente inchada | financial | `medium` | 🟡 |
 | RULE-005 — Baixa indicação/ativação | marketing | `medium` | 🟡 |
 | RULE-006 — Baixa renovação (proposta) | retention | `medium` | 🟡 |
+| RULE-007 — Agenda muito distante | operation | `high` | 🔴 |
 
 Mapeamento severidade → peso numérico (usado no `priority_score`, seção 5):
 
