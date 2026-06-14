@@ -1,6 +1,8 @@
 # Checklist de Prontidão para Deploy — ClinicOS AI
 
-Revisão realizada em 2026-06-13. Status geral: **✅ Pronto para deploy** (ver observações).
+Revisão realizada em 2026-06-13, atualizada em 2026-06-14. Status geral:
+**✅ Pronto para deploy** (ver observações e seção 9 para os passos no
+Vercel).
 
 ## 1. `.env.local` no `.gitignore`
 
@@ -21,8 +23,12 @@ Revisão realizada em 2026-06-13. Status geral: **✅ Pronto para deploy** (ver 
 - `SUPABASE_SERVICE_ROLE_KEY` só é referenciada em:
   - `lib/supabase/admin.ts` (server-only, ver item 3);
   - `scripts/check-supabase-connection.ts` (script Node executado fora do bundle do app).
-- Não há nenhum arquivo com `'use client'` no projeto atualmente, portanto não há
-  superfície de Client Component que possa importar `admin.ts` ou a service_role key.
+- O projeto agora tem 2 arquivos `'use client'`
+  (`components/theme-toggle.tsx`, `app/(app)/diagnostics/[id]/report/print-button.tsx`).
+  Nenhum dos dois lê `process.env` nem importa `lib/supabase/admin.ts` —
+  apenas `lib/supabase/client.ts`, `lib/supabase/server.ts` e
+  `lib/supabase/middleware.ts` acessam `process.env`, e nenhum deles expõe a
+  service_role key ao bundle do cliente.
 - `lib/supabase/client.ts` (cliente de browser) usa apenas
   `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_ANON_KEY`, ambas seguras para exposição pública.
 
@@ -39,7 +45,7 @@ Revisão realizada em 2026-06-13. Status geral: **✅ Pronto para deploy** (ver 
 ✅ OK.
 
 - `npm run typecheck` (`tsc --noEmit`) — sem erros.
-- `npm run build` — compila com sucesso e gera as 19 rotas esperadas (13 páginas + middleware),
+- `npm run build` — compila com sucesso e gera as 21 rotas atuais (20 páginas + middleware),
   todas como `ƒ` (dynamic/server-rendered), exceto `/_not-found` (estática).
 - Aviso cosmético do webpack sobre `process.version`/Edge Runtime, originado da reexportação de
   `createBrowserClient` pelo pacote `@supabase/ssr` dentro de `lib/supabase/middleware.ts`
@@ -102,6 +108,31 @@ Revisão realizada em 2026-06-13. Status geral: **✅ Pronto para deploy** (ver 
   (Supabase CLI, conexão direta ao banco). Não precisam ser configurados no Vercel.
 - `lib/supabase/admin.ts` (`createAdminClient`) ainda não é usado por nenhuma rota/página —
   caso passe a ser usado, manter sempre em código server-only (Server Actions/Route Handlers).
-- Não existe `.env.local.example`; ao integrar um novo ambiente, copiar as chaves usadas pelo
-  código (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`)
-  a partir deste checklist.
+- `.env.example` (raiz do projeto) documenta todas as variáveis acima, indicando quais são
+  obrigatórias no Vercel.
+
+## 9. Passos para o deploy no Vercel
+
+1. **Importar o repositório**: no dashboard do Vercel, "Add New… > Project" e
+   selecionar `reunioesdocfounder-debug/clinic-os-ai` (branch `main`). O
+   Vercel detecta o preset Next.js automaticamente (build command
+   `next build`, install command `npm install`) — nenhuma configuração extra
+   necessária.
+2. **Configurar as env vars** (Project Settings > Environment Variables),
+   copiando os valores de `.env.local` para os 3 itens marcados como
+   "obrigatória no Vercel" em `.env.example`:
+   - `NEXT_PUBLIC_SUPABASE_URL`
+   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `SUPABASE_SERVICE_ROLE_KEY` (apenas server-side; **não** prefixar com `NEXT_PUBLIC_`)
+3. **Aplicar a migration no Supabase de produção** (se ainda não aplicada):
+   rodar `supabase/migrations/20260612120000_initial_schema.sql` no projeto
+   Supabase referenciado por `NEXT_PUBLIC_SUPABASE_URL` (mesmo projeto usado
+   localmente, ref `cpnnuuylucaartirmlal`, ou um projeto novo de produção).
+4. **Atualizar URLs de redirect no Supabase Auth** (Authentication > URL
+   Configuration): adicionar a URL de produção do Vercel (ex.:
+   `https://<projeto>.vercel.app`) em "Site URL" e
+   `https://<projeto>.vercel.app/auth/callback` em "Redirect URLs" — usado por
+   `app/auth/callback/route.ts`.
+5. **Deploy** e validar manualmente: `/login`, fluxo de autenticação
+   (`/auth/callback`), e ao menos uma página de cada grupo protegido
+   (`/dashboard`, `/clinics`, `/diagnostics`, `/products`).
