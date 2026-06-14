@@ -92,4 +92,19 @@ export const RULE_DEFINITIONS: RuleDefinition[] = [
       'de melhoria em retenção.',
     impactCalculator: 'renewalGrowth',
   },
+
+  // RULE-007 — Agenda muito distante (operation / high)
+  {
+    id: 'RULE-007',
+    pillar: 'operation',
+    severity: 'high',
+    metric: 'average_days_until_appointment',
+    operator: '>',
+    threshold: 10,
+    title: 'Agenda muito distante',
+    description:
+      'O tempo médio entre agendamento e consulta está acima do recomendado, aumentando o risco de esfriamento ' +
+      'do lead, no-show e perda para concorrentes.',
+    impactCalculator: 'scheduleDelayRevenue',
+  },
 ];

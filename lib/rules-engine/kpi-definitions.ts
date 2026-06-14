@@ -8,7 +8,7 @@ import type { MetricKey } from './types';
 export interface KpiDefinition {
   key: MetricKey;
   label: string;
-  unit: 'percentage' | 'minutes';
+  unit: 'percentage' | 'minutes' | 'days';
   /** Casas decimais usadas ao registrar `evidence.value` (docs/RULES_ENGINE.md secao 3). */
   evidenceDecimals: number;
 }
@@ -49,5 +49,11 @@ export const KPI_DEFINITIONS: Record<MetricKey, KpiDefinition> = {
     label: 'Taxa de Renovação',
     unit: 'percentage',
     evidenceDecimals: 4,
+  },
+  average_days_until_appointment: {
+    key: 'average_days_until_appointment',
+    label: 'Tempo Médio até a Consulta',
+    unit: 'days',
+    evidenceDecimals: 1,
   },
 };

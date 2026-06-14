@@ -90,6 +90,26 @@ const renewalGrowth: ImpactCalculator = (context, rule) => {
   );
 };
 
+// RULE-007 — Agenda muito distante
+const scheduleDelayRevenue: ImpactCalculator = (context, rule, value) => {
+  const { commercialInput, commercialKpis } = context;
+  const gapDays = roundTo(value - rule.threshold, 1);
+  const unattendedAppointments = Math.max(
+    0,
+    commercialInput.scheduled_appointments - commercialInput.attended_appointments,
+  );
+  const conversionRate = commercialKpis.conversion_rate ?? 0;
+  const potentialRecoveredAppointments = Math.ceil(unattendedAppointments * conversionRate);
+  const potentialRevenue = potentialRecoveredAppointments * commercialInput.average_ticket;
+
+  return (
+    `A agenda está, em média, ${gapDays} dia(s) acima do prazo recomendado de 10 dias entre o agendamento e a ` +
+    `consulta. Reduzir esse prazo poderia recuperar aproximadamente ${potentialRecoveredAppointments} ` +
+    `atendimento(s) hoje não convertidos, equivalentes a ${formatCurrency(potentialRevenue)} em receita ` +
+    'potencial com base no ticket médio e na taxa de conversão atual.'
+  );
+};
+
 export const IMPACT_CALCULATORS: Record<ImpactCalculatorKey, ImpactCalculator> = {
   attendanceRecovery,
   responseTimeSla,
@@ -97,4 +117,5 @@ export const IMPACT_CALCULATORS: Record<ImpactCalculatorKey, ImpactCalculator> =
   payrollExcess,
   referralGrowth,
   renewalGrowth,
+  scheduleDelayRevenue,
 };

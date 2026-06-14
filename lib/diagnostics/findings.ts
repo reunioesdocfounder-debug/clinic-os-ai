@@ -28,6 +28,7 @@ export function generateFindings(input: FindingsInput): FindingDraft[] {
     facts: {
       attendance_rate: commercialKpis.attendance_rate,
       average_response_time_minutes: commercialInput.average_response_time_minutes,
+      average_days_until_appointment: commercialInput.average_days_until_appointment,
       net_margin: financialKpis.net_margin,
       payroll_percentage: financialKpis.payroll_percentage,
       referral_rate: commercialKpis.referral_rate,
@@ -35,6 +36,7 @@ export function generateFindings(input: FindingsInput): FindingDraft[] {
     },
     commercialInput,
     financialInput,
+    commercialKpis: { conversion_rate: commercialKpis.conversion_rate },
     financialKpis: { net_profit: financialKpis.net_profit },
   };
 

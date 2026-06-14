@@ -3,7 +3,7 @@
 // Ref.: docs/RULES_ENGINE.md secoes 3, 5 e 6; docs/NO_AI_RULES_SYSTEM.md secao 1
 // ============================================================================
 
-import type { CommercialMetricsInput, FinancialKpis, FinancialMetricsInput } from '@/lib/kpis';
+import type { CommercialKpis, CommercialMetricsInput, FinancialKpis, FinancialMetricsInput } from '@/lib/kpis';
 import type { Json, Pillar, Severity } from '@/lib/supabase/database.types';
 
 export type RuleOperator = '<' | '>';
@@ -12,6 +12,7 @@ export type RuleOperator = '<' | '>';
 export type MetricKey =
   | 'attendance_rate'
   | 'average_response_time_minutes'
+  | 'average_days_until_appointment'
   | 'net_margin'
   | 'payroll_percentage'
   | 'referral_rate'
@@ -25,6 +26,7 @@ export interface RuleContext {
   facts: FactsTable;
   commercialInput: CommercialMetricsInput;
   financialInput: FinancialMetricsInput;
+  commercialKpis: Pick<CommercialKpis, 'conversion_rate'>;
   financialKpis: Pick<FinancialKpis, 'net_profit'>;
 }
 
@@ -34,7 +36,8 @@ export type ImpactCalculatorKey =
   | 'netMarginRecovery'
   | 'payrollExcess'
   | 'referralGrowth'
-  | 'renewalGrowth';
+  | 'renewalGrowth'
+  | 'scheduleDelayRevenue';
 
 /** Gera o texto de `estimated_impact` de uma regra disparada (Tier 2 — docs/NO_AI_RULES_SYSTEM.md secao 1.5). */
 export type ImpactCalculator = (context: RuleContext, rule: RuleDefinition, value: number) => string;

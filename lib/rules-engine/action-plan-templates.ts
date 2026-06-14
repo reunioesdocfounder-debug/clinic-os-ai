@@ -222,4 +222,39 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
       },
     ],
   },
+
+  // RULE-007 — Agenda muito distante
+  'RULE-007': {
+    ruleId: 'RULE-007',
+    planTitle: 'Reorganização da Agenda',
+    description:
+      'Plano para reduzir o tempo médio entre agendamento e consulta, mitigando o risco de esfriamento do ' +
+      'lead, no-show e perda para concorrentes.',
+    objective: 'Reduzir o tempo médio entre agendamento e consulta para até 10 dias.',
+    expectedResult: 'average_days_until_appointment ≤ 10.',
+    expectedKpi: 'average_days_until_appointment',
+    phases: [
+      {
+        title: 'Fase 1 — Diagnóstico',
+        orderIndex: 1,
+        tasks: [
+          { title: 'Medir tempo médio até a consulta por profissional' },
+          { title: 'Identificar gargalos de agenda' },
+        ],
+      },
+      {
+        title: 'Fase 2 — Reorganização da Agenda',
+        orderIndex: 2,
+        tasks: [
+          { title: 'Criar encaixes estratégicos' },
+          { title: 'Criar lista de espera' },
+        ],
+      },
+      {
+        title: 'Fase 3 — Tecnologia/Automação',
+        orderIndex: 3,
+        tasks: [{ title: 'Automatizar confirmação e antecipação de consultas' }],
+      },
+    ],
+  },
 };
