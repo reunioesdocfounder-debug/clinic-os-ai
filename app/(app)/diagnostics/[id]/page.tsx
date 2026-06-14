@@ -229,6 +229,9 @@ export default async function DiagnosticDetailPage({
               Gerar planos de ação
             </Button>
           </form>
+          <ButtonLink href={`/diagnostics/${diagnostic.id}/roadmap`} variant="secondary">
+            Ver roteiro 30/60/90
+          </ButtonLink>
         </div>
       </section>
     </main>
