@@ -232,6 +232,9 @@ export default async function DiagnosticDetailPage({
           <ButtonLink href={`/diagnostics/${diagnostic.id}/roadmap`} variant="secondary">
             Ver roteiro 30/60/90
           </ButtonLink>
+          <ButtonLink href={`/diagnostics/${diagnostic.id}/report`} variant="secondary">
+            Ver relatório executivo
+          </ButtonLink>
         </div>
       </section>
     </main>
