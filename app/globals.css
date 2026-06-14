@@ -61,3 +61,43 @@ body {
 h1, h2, h3 {
   letter-spacing: -0.02em;
 }
+
+/* ----------------------------------------------------------------------------
+   Impressão / exportação em PDF (ex.: relatório executivo do diagnóstico)
+   ---------------------------------------------------------------------------- */
+@media print {
+  @page {
+    margin: 1.5cm;
+  }
+
+  :root,
+  .dark {
+    --color-canvas: #ffffff;
+    --color-surface: #ffffff;
+    --color-surface-hover: #ffffff;
+    --color-border: #d4d4d8;
+    --color-foreground: #000000;
+    --color-muted: #404040;
+    --shadow-card: none;
+    --shadow-card-hover: none;
+  }
+
+  body {
+    background-color: #ffffff !important;
+    background-image: none !important;
+    color: #000000 !important;
+  }
+
+  /* Navegação global e botões de ação não fazem sentido no papel/PDF. */
+  header,
+  .no-print {
+    display: none !important;
+  }
+
+  /* Evita que cards importantes (achados, planos, roteiro) sejam cortados
+     entre páginas. */
+  .print-avoid-break {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

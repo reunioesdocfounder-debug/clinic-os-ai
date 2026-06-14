@@ -15,6 +15,7 @@ import { ButtonLink } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { buildExecutiveRoadmap } from '@/lib/diagnostics/roadmap-generator';
+import { PrintButton } from './print-button';
 
 const PILLAR_CARDS: Array<{ key: keyof PillarScores; label: string }> = [
   { key: 'commercial_score', label: 'Comercial' },
@@ -182,16 +183,19 @@ export default async function DiagnosticReportPage({ params }: { params: Promise
           </>
         }
         actions={
-          <ButtonLink href={`/diagnostics/${id}`} variant="secondary">
-            Voltar
-          </ButtonLink>
+          <div className="no-print flex flex-wrap gap-2">
+            <ButtonLink href={`/diagnostics/${id}`} variant="secondary">
+              Voltar
+            </ButtonLink>
+            <PrintButton />
+          </div>
         }
       />
 
       {/* Score geral */}
       <section>
         <h2 className="mb-3 text-lg font-semibold tracking-tight">Score geral</h2>
-        <Card padding="p-6" className="flex flex-wrap items-center gap-4">
+        <Card padding="p-6" className="flex flex-wrap items-center gap-4 print-avoid-break">
           <span className="text-4xl font-bold tabular-nums">{diagnostic.general_score ?? '—'}</span>
           <ScoreBadge score={diagnostic.general_score} />
           {diagnostic.general_score === null && (
@@ -240,7 +244,7 @@ export default async function DiagnosticReportPage({ params }: { params: Promise
           <ul className="space-y-3">
             {findings.map((finding) => (
               <li key={finding.id}>
-                <Card padding="p-4" className="text-sm">
+                <Card padding="p-4" className="text-sm print-avoid-break">
                   <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
                     <span className="font-semibold">{finding.title}</span>
                     <Badge tone={SEVERITY_TONES[finding.severity]}>{SEVERITY_LABELS[finding.severity]}</Badge>
@@ -269,7 +273,7 @@ export default async function DiagnosticReportPage({ params }: { params: Promise
         ) : (
           <div className="space-y-6">
             {plans.map((plan) => (
-              <Card key={plan.id} padding="p-4">
+              <Card key={plan.id} padding="p-4" className="print-avoid-break">
                 <div className="mb-2 flex items-center justify-between gap-2">
                   <h3 className="text-base font-semibold tracking-tight">{plan.title}</h3>
                   <Badge tone="blue">{ACTION_PLAN_STATUS_LABELS[plan.status]}</Badge>
@@ -340,7 +344,7 @@ export default async function DiagnosticReportPage({ params }: { params: Promise
                 ) : (
                   <div className="space-y-3">
                     {windowResult.projects.map((project) => (
-                      <Card key={project.actionPlanId} padding="p-4">
+                      <Card key={project.actionPlanId} padding="p-4" className="print-avoid-break">
                         <h4 className="mb-2 text-sm font-semibold tracking-tight">{project.title}</h4>
 
                         {project.expectedResult && (
