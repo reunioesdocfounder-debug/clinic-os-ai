@@ -191,9 +191,15 @@ export function evaluateRules(facts: FactsTable, rawInputs: RawInputs): FindingD
       title: rule.title,
       description: render(rule.descriptionTemplate, baseVars),
       estimated_impact: render(rule.impactTemplate, { ...baseVars, ...extraVars }),
-      evidence: { kpi: rule.metric, value: roundTo(value, 4), threshold: rule.threshold, operator: rule.operator, unit: KPI_DEFINITIONS[rule.metric]?.unit },
+      evidence: {
+        kpi: rule.metric,
+        value: roundTo(value, 4),
+        threshold: rule.threshold,
+        operator: rule.operator,
+        unit: KPI_DEFINITIONS[rule.metric]?.unit,
+        rule_id: rule.id, // persistido dentro de evidence — ver secao 3.2 (sem nova coluna)
+      },
       priority_score: calculatePriorityScore({ severity: rule.severity, pillar: rule.pillar, value, threshold: rule.threshold, operator: rule.operator }),
-      rule_id: rule.id, // NOVO campo — ver secao 3.2
     }];
   });
 }
@@ -292,6 +298,13 @@ export function generateActionPlans(findings: { rule_id: string; severity: Sever
 }
 ```
 
+> **Nota de implementação (ver seção 3.2):** no código real, `findings`
+> chega como `{ evidence: Json; severity: Severity }[]` e o `rule_id` é
+> extraído via `getRuleId(finding.evidence)` — o pseudocódigo acima
+> simplifica `finding.rule_id` para focar no vínculo lógico
+> finding → `ACTION_PLAN_TEMPLATES` por `ruleId`. Não há coluna
+> `diagnostic_findings.rule_id`.
+
 ### 2.3 Biblioteca de fases/tarefas reutilizáveis (futuro, não no MVP da refatoração)
 
 Hoje cada plano define 9 tarefas inline, com pouca repetição entre planos —
@@ -335,22 +348,82 @@ refatoração:
 6. Rodar `npm test` (testes de regra, seção 5.2) e regenerar um
    diagnóstico de exemplo para validar texto/score.
 
-### 3.2 Mudança de schema necessária: `diagnostic_findings.rule_id`
+### 3.2 Persistência de `rule_id`: `evidence.rule_id` (implementado, sem migration)
 
-Para o vínculo por `rule_id` (seção 2.1) funcionar, `diagnostic_findings`
-precisa de uma coluna nova:
+> **Status:** implementado na Fase 1. Esta seção documenta a decisão **real**
+> adotada para o vínculo por `rule_id` (seção 2.1) — substitui a proposta
+> original abaixo, que **não foi aplicada**.
+
+A proposta original deste documento sugeria uma nova coluna em
+`diagnostic_findings`:
 
 ```sql
+-- Proposta original (NÃO aplicada)
 alter table public.diagnostic_findings
   add column rule_id text;
 ```
 
-- Nullable, sem `not null` (não quebra linhas existentes).
-- `generateDiagnostic` (que já faz delete+reinsert idempotente) passa a
-  popular `rule_id` automaticamente na próxima geração.
-- Findings antigos (sem `rule_id`) simplesmente não geram plano de ação até
-  o diagnóstico ser regerado — comportamento aceitável dado que "Gerar
-  diagnóstico" e "Gerar planos de ação" já são ações explícitas do usuário.
+**Decisão adotada (MVP):** em vez de alterar o schema, `rule_id` é
+persistido **dentro de `diagnostic_findings.evidence`** (coluna `jsonb not
+null default '{}'`, já existente desde a migration inicial
+`20260612120000_initial_schema.sql`):
+
+```json
+{
+  "kpi": "attendance_rate",
+  "value": 0.62,
+  "threshold": 0.75,
+  "operator": "<",
+  "unit": "percentage",
+  "rule_id": "RULE-001"
+}
+```
+
+- `lib/rules-engine/index.ts` (`evaluateRules`) grava `rule_id: rule.id`
+  como mais uma chave de `evidence` ao montar cada finding (ver seção 1.4).
+- `lib/diagnostics/action-plan-generator.ts` e
+  `lib/diagnostics/roadmap-generator.ts` leem esse valor através do helper
+  `getRuleId(evidence: Json): string | null`, que faz o parsing defensivo do
+  `jsonb` (`evidence` pode ser objeto, array, string, número, etc. — tipo
+  `Json`).
+
+**Por que essa escolha:**
+
+- **Evita migration agora**: nenhuma alteração de schema, RLS ou
+  `database.types.ts` é necessária — `evidence` já é `jsonb` livre, e o
+  motor de regras só passou a escrever uma chave adicional nele.
+- **Mantém compatibilidade com o schema atual**: continua valendo o
+  comportamento original previsto para findings sem `rule_id` — eles
+  simplesmente não geram plano de ação automático (`getRuleId()` retorna
+  `null`) até o diagnóstico ser regerado, o que já é uma ação explícita do
+  usuário ("Gerar diagnóstico" / "Gerar planos de ação").
+- **Suficiente para o uso atual**: o vínculo finding → `ACTION_PLAN_TEMPLATES`
+  / roteiro 30-60-90 (seções 2.1/2.2) só precisa de leitura programática do
+  `rule_id` em TypeScript, não de filtros ou agregações em SQL sobre essa
+  coluna.
+
+**Quando criar uma coluna `rule_id` dedicada (futuro):** se surgir a
+necessidade de **filtros, agregações ou relatórios em SQL** baseados em
+`rule_id` (ex.: "quantos diagnósticos dispararam RULE-003 no último
+trimestre", dashboards administrativos, índices por regra), aí sim vale a
+migration:
+
+```sql
+alter table public.diagnostic_findings
+  add column rule_id text;
+
+-- backfill a partir de evidence para findings já existentes
+update public.diagnostic_findings
+  set rule_id = evidence->>'rule_id'
+  where rule_id is null;
+
+create index if not exists diagnostic_findings_rule_id_idx
+  on public.diagnostic_findings (rule_id);
+```
+
+Até que esse gatilho ocorra, `evidence.rule_id` permanece a fonte da
+verdade — `database.types.ts` reflete corretamente o schema atual (sem
+coluna `rule_id`).
 
 ---
 
@@ -438,15 +511,15 @@ Reavaliar quando **qualquer um** destes ocorrer:
   declarativo — **textos e valores idênticos**.
 - Generalizar `calculatePillarScores` (lib/kpis/scoring.ts) para usar
   `KPI_DEFINITIONS` em vez do mapeamento hardcoded.
-- Migration: `alter table diagnostic_findings add column rule_id text;`
-  + popular `rule_id` no `evaluator.ts`.
+- `evaluator.ts` passa a gravar `rule_id` dentro de `evidence.rule_id`
+  (jsonb) — **sem migration de schema** (decisão documentada na seção 3.2).
 - Atualizar `build-diagnostic.ts` (monta `FactsTable`) e os Server Actions
   (`.../actions.ts`, `.../action-plans/actions.ts`) para os novos pontos de
   entrada.
 - **Critério de aceite**: para um conjunto de diagnósticos de teste, os
   `diagnostic_findings` e `action_plans`/`phases`/`tasks` gerados são
-  **idênticos byte-a-byte** (exceto pelo novo campo `rule_id`) aos gerados
-  pelo código atual.
+  **idênticos byte-a-byte** (exceto pela nova chave `evidence.rule_id`) aos
+  gerados pelo código atual.
 
 ### Fase 2 — Testes e documentação
 
@@ -490,7 +563,10 @@ Só executar se um dos gatilhos da seção 4.3 ocorrer:
 - **Substituição** de `lib/diagnostics/findings.ts` e
   `lib/diagnostics/action-plan-generator.ts` pelo novo motor (mesmo
   comportamento).
-- **1 migration SQL** pequena: `diagnostic_findings.rule_id text`.
+- **Sem migration de schema**: `rule_id` é persistido em
+  `evidence.rule_id` (jsonb), reaproveitando a coluna `evidence` já existente
+  (ver seção 3.2). Uma coluna dedicada `diagnostic_findings.rule_id` fica
+  como opção futura, caso surjam filtros/relatórios SQL por regra.
 - **Sem novas tabelas Supabase** nesta fase — porta aberta via
   `repository.ts` para o futuro (seção 4.2).
 - **Atualização de `docs/RULES_ENGINE.md`** com o novo formato declarativo
