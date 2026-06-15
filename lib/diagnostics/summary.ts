@@ -6,6 +6,7 @@
 import { getKpiStatus, type KpiStatus, type PillarScores } from '@/lib/kpis';
 import type { Severity } from '@/lib/supabase/database.types';
 import type { FindingDraft } from './findings';
+import { getMaturityLevel } from './maturity';
 
 const PILLAR_LABELS: Record<keyof PillarScores, string> = {
   commercial_score: 'Comercial',
@@ -55,6 +56,14 @@ export function buildExecutiveSummary(input: ExecutiveSummaryInput): string {
       `O score geral da clínica neste período é ${generalScore.toFixed(1)} de 100, ` +
         `classificado como ${STATUS_LABELS[status ?? 'critico']}.`,
     );
+
+    const maturity = getMaturityLevel(generalScore);
+    if (maturity) {
+      paragraphs.push(
+        `Nível de maturidade: ${maturity.label}. ${maturity.description} ` +
+          `Foco recomendado: ${maturity.recommended_focus}`,
+      );
+    }
   }
 
   const pillarSentences = (Object.keys(PILLAR_LABELS) as Array<keyof PillarScores>)

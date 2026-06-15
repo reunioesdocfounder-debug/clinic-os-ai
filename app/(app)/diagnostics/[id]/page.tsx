@@ -8,6 +8,7 @@ import { ButtonLink, Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { Alert } from '@/components/ui/alert';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
+import { getMaturityLevel } from '@/lib/diagnostics/maturity';
 import { generateDiagnostic } from './actions';
 import { generateActionPlans } from './action-plans/actions';
 
@@ -106,6 +107,8 @@ export default async function DiagnosticDetailPage({
     .eq('diagnostic_id', id)
     .order('priority_score', { ascending: false });
 
+  const maturity = getMaturityLevel(diagnostic.general_score);
+
   return (
     <main className="mx-auto max-w-4xl space-y-8 p-6">
       {/* Cabeçalho do diagnóstico */}
@@ -139,6 +142,23 @@ export default async function DiagnosticDetailPage({
           )}
         </Card>
       </section>
+
+      {/* Nível de maturidade */}
+      {maturity && (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold tracking-tight">Nível de maturidade</h2>
+          <Card padding="p-6" className="space-y-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="text-xl font-semibold">{maturity.label}</span>
+              <Badge tone={STATUS_TONES[maturity.status]}>{STATUS_LABELS_PT[maturity.status]}</Badge>
+            </div>
+            <p className="text-sm text-foreground">{maturity.description}</p>
+            <p className="text-sm text-muted">
+              <strong>Foco recomendado:</strong> {maturity.recommended_focus}
+            </p>
+          </Card>
+        </section>
+      )}
 
       {/* Scores por pilar */}
       <section>

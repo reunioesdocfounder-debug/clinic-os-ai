@@ -535,3 +535,51 @@ Mapeamento severidade → prioridade da tarefa:
 A geração de `diagnostic_findings` e `action_plans` (seções 3 e 6) é o
 **motor de regras**, que consome a camada de KPIs mas é implementado
 separadamente (fora do escopo desta primeira entrega de `lib/kpis/`).
+
+---
+
+# 8. Score de Maturidade
+
+A partir do `general_score` (seção 1.4), o sistema classifica a clínica em um
+dos 4 níveis de maturidade executiva — uma camada de apresentação que
+reutiliza as mesmas faixas da seção 1.6, traduzindo o score numérico em uma
+classificação de negócio compreensível para o cliente final.
+
+Implementado em `lib/diagnostics/maturity.ts` — `getMaturityLevel(generalScore)`.
+Retorna `null` quando `general_score` é `null` (diagnóstico ainda não gerado).
+
+## 8.1 Níveis
+
+| Score | Nível (`label`) | `status` | Foco recomendado (`recommended_focus`) |
+| --- | --- | --- | --- |
+| 0–39 | Clínica em risco | `critico` | Estabilizar a operação: priorizar os planos de ação de severidade crítica/alta para reverter os indicadores antes de investir em crescimento. |
+| 40–59 | Clínica desorganizada | `atencao` | Estruturar e padronizar os processos comerciais, financeiros e de atendimento antes de acelerar o crescimento. |
+| 60–79 | Clínica estruturada | `bom` | Reforçar os pilares com desempenho abaixo da média e preparar a operação para crescer com previsibilidade. |
+| 80–100 | Clínica escalável | `excelente` | Investir em expansão (novas unidades, produtos ou canais de aquisição), mantendo o monitoramento contínuo dos indicadores. |
+
+Cada nível também retorna uma `description` (1 frase) com o diagnóstico
+executivo do estágio atual da clínica.
+
+## 8.2 Formato de retorno
+
+```ts
+interface MaturityLevel {
+  label: string;
+  description: string;
+  recommended_focus: string;
+  status: 'critico' | 'atencao' | 'bom' | 'excelente';
+}
+```
+
+`status` reutiliza a mesma taxonomia de `getKpiStatus()` (seção 1.6), permitindo
+reaproveitar as cores/badges já usados para os scores por pilar.
+
+## 8.3 Onde é exibido
+
+- `app/(app)/diagnostics/[id]/page.tsx` — card "Nível de maturidade" logo após
+  o score geral.
+- `app/(app)/diagnostics/[id]/report/page.tsx` — mesmo card no relatório
+  executivo (incluído na impressão).
+- `lib/diagnostics/summary.ts` — `buildExecutiveSummary()` adiciona um
+  parágrafo com o nível de maturidade, sua descrição e o foco recomendado ao
+  `executive_summary` gerado junto com o diagnóstico.
