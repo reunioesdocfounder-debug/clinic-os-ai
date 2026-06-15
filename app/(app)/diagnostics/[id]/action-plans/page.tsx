@@ -1,6 +1,7 @@
 import { notFound, redirect } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import type { ActionPlanStatus, TaskPriority, TaskStatus, Tables } from '@/lib/supabase/database.types';
+import { KPI_DEFINITIONS, type MetricKey } from '@/lib/rules-engine';
 import { monthLabel } from '@/app/(app)/diagnostics/constants';
 import { Card } from '@/components/ui/card';
 import { ButtonLink, Button } from '@/components/ui/button';
@@ -36,6 +37,10 @@ const TASK_PRIORITY_TONES: Record<TaskPriority, BadgeTone> = {
   medium: 'yellow',
   low: 'gray',
 };
+
+function kpiLabel(metricKey: string): string {
+  return KPI_DEFINITIONS[metricKey as MetricKey]?.label ?? metricKey;
+}
 
 export default async function ActionPlansPage({
   params,
@@ -179,7 +184,7 @@ export default async function ActionPlansPage({
                           <div>
                             <p>{task.title}</p>
                             {task.expected_kpi && (
-                              <p className="text-xs text-muted">KPI: {task.expected_kpi}</p>
+                              <p className="text-xs text-muted">Indicador: {kpiLabel(task.expected_kpi)}</p>
                             )}
                           </div>
                           <div className="flex flex-shrink-0 gap-1">

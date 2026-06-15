@@ -16,7 +16,7 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
     planTitle: 'Recuperação de No-show',
     description: 'Plano para reduzir o índice de no-show e recuperar agendamentos confirmados.',
     objective: 'Reduzir a taxa de no-show para acima de 75%.',
-    expectedResult: 'attendance_rate ≥ 0.75 no próximo diagnóstico.',
+    expectedResult: 'Taxa de comparecimento ≥ 75% no próximo diagnóstico.',
     expectedKpi: 'attendance_rate',
     phases: [
       {
@@ -24,7 +24,7 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
         orderIndex: 1,
         tasks: [
           { title: 'Levantar motivos de não comparecimento' },
-          { title: 'Analisar average_days_until_appointment' },
+          { title: 'Analisar o tempo médio até a consulta' },
         ],
       },
       {
@@ -52,7 +52,7 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
     planTitle: 'Aceleração do Atendimento Comercial',
     description: 'Plano para reduzir o tempo de resposta a leads e aumentar a conversão do funil comercial.',
     objective: 'Reduzir o tempo médio de resposta a leads para até 15 minutos.',
-    expectedResult: 'average_response_time_minutes ≤ 15.',
+    expectedResult: 'Tempo médio de resposta ≤ 15 minutos no próximo diagnóstico.',
     expectedKpi: 'average_response_time_minutes',
     phases: [
       {
@@ -88,15 +88,15 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
     planTitle: 'Recuperação de Margem',
     description: 'Plano para elevar a margem líquida e reduzir o risco à sustentabilidade financeira da clínica.',
     objective: 'Elevar a margem líquida para acima de 10%.',
-    expectedResult: 'net_margin ≥ 0.10.',
+    expectedResult: 'Margem líquida ≥ 10% no próximo diagnóstico.',
     expectedKpi: 'net_margin',
     phases: [
       {
         title: 'Fase 1 — Diagnóstico',
         orderIndex: 1,
         tasks: [
-          { title: 'Detalhar composição de custos e despesas (direct_costs, operational_expenses, other_expenses)' },
-          { title: 'Identificar produtos/serviços com product_margin negativa' },
+          { title: 'Detalhar composição de custos e despesas (custos diretos, despesas operacionais, outras despesas)' },
+          { title: 'Identificar produtos/serviços com margem negativa' },
         ],
       },
       {
@@ -123,15 +123,15 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
     ruleId: 'RULE-004',
     planTitle: 'Otimização da Estrutura de Equipe',
     description: 'Plano para reduzir o peso da folha de pagamento sobre o faturamento bruto.',
-    objective: 'Reduzir payroll_percentage para 35% ou menos.',
-    expectedResult: 'payroll_percentage ≤ 0.35.',
+    objective: 'Reduzir o percentual da folha de pagamento sobre o faturamento para 35% ou menos.',
+    expectedResult: 'Percentual de folha sobre faturamento ≤ 35% no próximo diagnóstico.',
     expectedKpi: 'payroll_percentage',
     phases: [
       {
         title: 'Fase 1 — Diagnóstico',
         orderIndex: 1,
         tasks: [
-          { title: 'Mapear clinic_team vs. volume de atendimentos/receita' },
+          { title: 'Mapear a equipe da clínica vs. volume de atendimentos/receita' },
           { title: 'Identificar funções com ociosidade' },
         ],
       },
@@ -156,8 +156,8 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
     ruleId: 'RULE-005',
     planTitle: 'Programa de Indicação e Ativação',
     description: 'Plano para aumentar a geração de indicações e a ativação da base de pacientes.',
-    objective: 'Elevar referral_rate para 10% ou mais.',
-    expectedResult: 'referral_rate ≥ 0.10.',
+    objective: 'Elevar a taxa de indicação para 10% ou mais.',
+    expectedResult: 'Taxa de indicação ≥ 10% no próximo diagnóstico.',
     expectedKpi: 'referral_rate',
     phases: [
       {
@@ -192,8 +192,8 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
     ruleId: 'RULE-006',
     planTitle: 'Programa de Retenção e Renovação',
     description: 'Plano para aumentar a taxa de renovação entre os pacientes elegíveis.',
-    objective: 'Elevar renewal_rate para 60% ou mais.',
-    expectedResult: 'renewal_rate ≥ 0.60.',
+    objective: 'Elevar a taxa de renovação para 60% ou mais.',
+    expectedResult: 'Taxa de renovação ≥ 60% no próximo diagnóstico.',
     expectedKpi: 'renewal_rate',
     phases: [
       {
@@ -231,7 +231,7 @@ export const ACTION_PLAN_TEMPLATES: Record<string, ActionPlanTemplate> = {
       'Plano para reduzir o tempo médio entre agendamento e consulta, mitigando o risco de esfriamento do ' +
       'lead, no-show e perda para concorrentes.',
     objective: 'Reduzir o tempo médio entre agendamento e consulta para até 10 dias.',
-    expectedResult: 'average_days_until_appointment ≤ 10.',
+    expectedResult: 'Tempo médio até a consulta ≤ 10 dias no próximo diagnóstico.',
     expectedKpi: 'average_days_until_appointment',
     phases: [
       {
