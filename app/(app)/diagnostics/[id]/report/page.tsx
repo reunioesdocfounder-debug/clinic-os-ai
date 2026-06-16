@@ -15,6 +15,7 @@ import { ButtonLink } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { getMaturityLevel } from '@/lib/diagnostics/maturity';
+import { getNextCycleRecommendations } from '@/lib/diagnostics/next-cycle';
 import { buildExecutiveRoadmap } from '@/lib/diagnostics/roadmap-generator';
 import { PrintButton } from './print-button';
 
@@ -174,6 +175,7 @@ export default async function DiagnosticReportPage({ params }: { params: Promise
   });
 
   const maturity = getMaturityLevel(diagnostic.general_score);
+  const nextCycle = getNextCycleRecommendations(findings ?? []);
 
   return (
     <main className="mx-auto max-w-4xl space-y-8 p-6">
@@ -278,6 +280,39 @@ export default async function DiagnosticReportPage({ params }: { params: Promise
                       <strong>Impacto estimado:</strong> {finding.estimated_impact}
                     </p>
                   )}
+                </Card>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* Prioridades do próximo ciclo */}
+      <section>
+        <h2 className="mb-3 text-lg font-semibold tracking-tight">Prioridades do próximo ciclo</h2>
+        {nextCycle.length === 0 ? (
+          <p className="text-sm text-muted">
+            Gere o diagnóstico para ver as prioridades recomendadas para o próximo ciclo de gestão.
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {nextCycle.map((rec, i) => (
+              <li key={rec.rule_id}>
+                <Card padding="p-4" className="text-sm print-avoid-break">
+                  <div className="mb-1 flex flex-wrap items-center justify-between gap-2">
+                    <span className="font-semibold">{i + 1}. {rec.foco}</span>
+                    <Badge tone={SEVERITY_TONES[rec.severity]}>{SEVERITY_LABELS[rec.severity]}</Badge>
+                  </div>
+                  <p className="mb-2 text-xs text-muted">{PILLAR_LABELS[rec.pillar]}</p>
+                  <p className="mb-1 text-foreground">
+                    <strong className="font-medium">Motivo:</strong> {rec.motivo}
+                  </p>
+                  <p className="mb-1 text-foreground">
+                    <strong className="font-medium">Ação sugerida:</strong> {rec.acao_sugerida}
+                  </p>
+                  <p className="text-muted">
+                    <strong className="font-medium">KPI a acompanhar:</strong> {rec.kpi_a_acompanhar}
+                  </p>
                 </Card>
               </li>
             ))}
