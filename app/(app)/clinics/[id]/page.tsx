@@ -36,6 +36,9 @@ export default async function ClinicDetailPage({
             <ButtonLink href={`/clinics/${clinic.id}/edit`} variant="primary">
               Editar
             </ButtonLink>
+            <ButtonLink href={`/clinics/${clinic.id}/history`} variant="secondary">
+              Ver histórico
+            </ButtonLink>
             <ButtonLink href="/clinics" variant="secondary">
               Voltar
             </ButtonLink>
