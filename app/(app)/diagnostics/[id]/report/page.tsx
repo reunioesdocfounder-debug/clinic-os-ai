@@ -16,6 +16,7 @@ import { PageHeader } from '@/components/ui/page-header';
 import { Badge, type BadgeTone } from '@/components/ui/badge';
 import { getMaturityLevel } from '@/lib/diagnostics/maturity';
 import { getNextCycleRecommendations } from '@/lib/diagnostics/next-cycle';
+import { buildSnapshot, buildComparison, type DiagnosticComparison, type MetricDiff } from '@/lib/diagnostics/comparison';
 import { buildExecutiveRoadmap } from '@/lib/diagnostics/roadmap-generator';
 import { PrintButton } from './print-button';
 
@@ -90,6 +91,67 @@ const TASK_PRIORITY_TONES: Record<TaskPriority, BadgeTone> = {
   medium: 'yellow',
   low: 'gray',
 };
+
+// ── Helpers de formatação para a seção de comparação histórica ──────────────
+
+type MetricFormat = 'brl' | 'pct' | 'score';
+
+function fmtValue(value: number | null, fmt: MetricFormat): string {
+  if (value === null) return '—';
+  if (fmt === 'brl')
+    return value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
+  if (fmt === 'pct') return `${(value * 100).toFixed(1)}%`;
+  return value.toFixed(1);
+}
+
+function fmtDelta(delta: number | null, fmt: MetricFormat): string {
+  if (delta === null) return '—';
+  const sign = delta > 0 ? '+' : '';
+  if (fmt === 'brl')
+    return `${sign}${delta.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 })}`;
+  if (fmt === 'pct') return `${sign}${(delta * 100).toFixed(1)} pp`;
+  return `${sign}${delta.toFixed(1)}`;
+}
+
+function deltaClass(delta: number | null): string {
+  if (delta === null || delta === 0) return 'text-muted';
+  return delta > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400';
+}
+
+function DiffRow({ label, diff, fmt }: { label: string; diff: MetricDiff; fmt: MetricFormat }) {
+  const cls = deltaClass(diff.delta);
+  const arrow = diff.delta === null || diff.delta === 0 ? '→' : diff.delta > 0 ? '↑' : '↓';
+  return (
+    <tr className="border-b border-border last:border-0">
+      <td className="py-2 pr-4 text-sm text-foreground">{label}</td>
+      <td className="py-2 pr-4 text-right text-sm tabular-nums text-muted">{fmtValue(diff.previous, fmt)}</td>
+      <td className="py-2 pr-4 text-right text-sm tabular-nums font-semibold">{fmtValue(diff.current, fmt)}</td>
+      <td className={`py-2 pr-4 text-right text-sm tabular-nums ${cls}`}>
+        {arrow} {fmtDelta(diff.delta, fmt)}
+      </td>
+      <td className={`py-2 text-right text-xs tabular-nums ${cls}`}>
+        {diff.pct_change !== null
+          ? `${diff.pct_change > 0 ? '+' : ''}${diff.pct_change.toFixed(1)}%`
+          : '—'}
+      </td>
+    </tr>
+  );
+}
+
+function DiffSectionHeader({ title }: { title: string }) {
+  return (
+    <tr>
+      <td
+        colSpan={5}
+        className="bg-surface-hover py-2 text-xs font-semibold uppercase tracking-wide text-muted"
+      >
+        {title}
+      </td>
+    </tr>
+  );
+}
+
+// ────────────────────────────────────────────────────────────────────────────
 
 function ScoreBadge({ score }: { score: number | null }) {
   const status = getKpiStatus(score);
@@ -174,6 +236,36 @@ export default async function DiagnosticReportPage({ params }: { params: Promise
     findings: findings ?? [],
   });
 
+  // Diagnóstico anterior da mesma clínica (para comparação histórica)
+  const { data: prevRows } = await supabase
+    .from('diagnostics')
+    .select('*')
+    .eq('clinic_id', diagnostic.clinic_id)
+    .neq('id', id)
+    .order('period_year', { ascending: false })
+    .order('period_month', { ascending: false })
+    .limit(1);
+
+  const prevDiagnostic = prevRows?.[0] ?? null;
+
+  let comparison: DiagnosticComparison | null = null;
+  let prevLabel = '';
+
+  if (prevDiagnostic) {
+    const [{ data: currFin }, { data: currCom }, { data: prevFin }, { data: prevCom }] =
+      await Promise.all([
+        supabase.from('financial_metrics').select('*').eq('diagnostic_id', id).maybeSingle(),
+        supabase.from('commercial_metrics').select('*').eq('diagnostic_id', id).maybeSingle(),
+        supabase.from('financial_metrics').select('*').eq('diagnostic_id', prevDiagnostic.id).maybeSingle(),
+        supabase.from('commercial_metrics').select('*').eq('diagnostic_id', prevDiagnostic.id).maybeSingle(),
+      ]);
+
+    const currSnapshot = buildSnapshot(diagnostic, currFin ?? null, currCom ?? null);
+    const prevSnapshot = buildSnapshot(prevDiagnostic, prevFin ?? null, prevCom ?? null);
+    comparison = buildComparison(currSnapshot, prevSnapshot);
+    prevLabel = `${monthLabel(prevDiagnostic.period_month)}/${prevDiagnostic.period_year}`;
+  }
+
   const maturity = getMaturityLevel(diagnostic.general_score);
   const nextCycle = getNextCycleRecommendations(findings ?? []);
 
@@ -244,6 +336,55 @@ export default async function DiagnosticReportPage({ params }: { params: Promise
           })}
         </div>
       </section>
+
+      {/* Evolução em relação ao ciclo anterior */}
+      {comparison && (
+        <section>
+          <h2 className="mb-3 text-lg font-semibold tracking-tight">
+            Evolução em relação ao ciclo anterior
+          </h2>
+          <Card padding="p-0" className="overflow-x-auto print-avoid-break">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-border">
+                  <th className="py-2 pr-4 text-left text-xs font-semibold uppercase tracking-wide text-muted">
+                    Métrica
+                  </th>
+                  <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wide text-muted">
+                    {prevLabel}
+                  </th>
+                  <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wide text-muted">
+                    Atual
+                  </th>
+                  <th className="py-2 pr-4 text-right text-xs font-semibold uppercase tracking-wide text-muted">
+                    Diferença
+                  </th>
+                  <th className="py-2 text-right text-xs font-semibold uppercase tracking-wide text-muted">
+                    Var. %
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <DiffSectionHeader title="Scores" />
+                <DiffRow label="Score geral" diff={comparison.diffs.general_score} fmt="score" />
+                <DiffRow label="Comercial" diff={comparison.diffs.commercial_score} fmt="score" />
+                <DiffRow label="Financeiro" diff={comparison.diffs.financial_score} fmt="score" />
+                <DiffSectionHeader title="Financeiro" />
+                <DiffRow label="Receita bruta" diff={comparison.diffs.gross_revenue} fmt="brl" />
+                <DiffRow label="Lucro líquido" diff={comparison.diffs.net_profit} fmt="brl" />
+                <DiffRow label="Margem líquida" diff={comparison.diffs.net_margin} fmt="pct" />
+                <DiffSectionHeader title="Comercial" />
+                <DiffRow label="Comparecimento" diff={comparison.diffs.attendance_rate} fmt="pct" />
+                <DiffRow label="Conversão" diff={comparison.diffs.conversion_rate} fmt="pct" />
+                <DiffRow label="Renovação" diff={comparison.diffs.renewal_rate} fmt="pct" />
+              </tbody>
+            </table>
+          </Card>
+          <p className="mt-2 text-xs text-muted">
+            ↑ melhora · ↓ piora · pp = pontos percentuais
+          </p>
+        </section>
+      )}
 
       {/* Resumo executivo */}
       <section>
