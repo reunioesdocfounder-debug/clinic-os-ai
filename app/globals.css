@@ -3,6 +3,7 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  color-scheme: light;
   --color-canvas: #f7fafa;
   --color-surface: #ffffff;
   --color-surface-hover: #f1f5f4;
@@ -17,6 +18,7 @@
 }
 
 .dark {
+  color-scheme: dark;
   --color-canvas: #0a0f0d;
   --color-surface: rgba(255, 255, 255, 0.04);
   --color-surface-hover: rgba(255, 255, 255, 0.07);
