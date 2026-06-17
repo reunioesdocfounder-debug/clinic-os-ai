@@ -53,7 +53,7 @@ export default async function DiagnosticsPage() {
       )}
 
       {!error && diagnostics && diagnostics.length > 0 && (
-        <Card padding="p-0" className="divide-y divide-border">
+        <Card padding="p-0" className="max-h-[70vh] divide-y divide-border overflow-y-auto">
           {diagnostics.map((diagnostic) => (
             <Link
               key={diagnostic.id}

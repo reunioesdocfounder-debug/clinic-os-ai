@@ -52,7 +52,7 @@ export default async function ProductsPage() {
       )}
 
       {!error && products && products.length > 0 && (
-        <Card padding="p-0" className="divide-y divide-border">
+        <Card padding="p-0" className="max-h-[70vh] divide-y divide-border overflow-y-auto">
           {products.map((product) => (
             <Link
               key={product.id}

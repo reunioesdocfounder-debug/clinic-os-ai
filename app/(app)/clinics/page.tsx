@@ -42,7 +42,7 @@ export default async function ClinicsPage() {
       )}
 
       {!error && clinics && clinics.length > 0 && (
-        <Card padding="p-0" className="divide-y divide-border">
+        <Card padding="p-0" className="max-h-[70vh] divide-y divide-border overflow-y-auto">
           {clinics.map((clinic) => (
             <Link
               key={clinic.id}

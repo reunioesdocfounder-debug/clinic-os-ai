@@ -80,7 +80,7 @@ export default async function ClinicHistoryPage({
       )}
 
       {list.length > 0 && (
-        <Card padding="p-0" className="divide-y divide-border">
+        <Card padding="p-0" className="max-h-[70vh] divide-y divide-border overflow-y-auto">
           {list.map((diagnostic) => {
             const status = getKpiStatus(diagnostic.general_score);
             return (
