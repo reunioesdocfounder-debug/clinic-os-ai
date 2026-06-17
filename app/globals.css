@@ -64,6 +64,15 @@ h1, h2, h3 {
   letter-spacing: -0.02em;
 }
 
+/* A lista de opções do <select> é renderizada pelo navegador como um popup
+   nativo fora do fluxo da página, então `color-scheme` por si só nem sempre
+   garante contraste correto. Cores explícitas e opacas aqui evitam texto
+   ilegível (mesma cor do tema aplicada sobre o fundo claro padrão do popup). */
+select option {
+  background-color: var(--color-canvas);
+  color: var(--color-foreground);
+}
+
 /* ----------------------------------------------------------------------------
    Impressão / exportação em PDF (ex.: relatório executivo do diagnóstico)
    ---------------------------------------------------------------------------- */
