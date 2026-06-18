@@ -8,6 +8,13 @@ import { ButtonLink, Button } from '@/components/ui/button';
 import { PageHeader } from '@/components/ui/page-header';
 import { Alert } from '@/components/ui/alert';
 import { Label, Select } from '@/components/ui/field';
+import { Badge, type BadgeTone } from '@/components/ui/badge';
+
+const STATUS_TONES: Record<DiagnosticStatus, BadgeTone> = {
+  draft: 'yellow',
+  completed: 'green',
+  archived: 'gray',
+};
 
 export default async function DiagnosticsPage({
   searchParams,
@@ -146,10 +153,12 @@ export default async function DiagnosticsPage({
               href={`/diagnostics/${diagnostic.id}`}
               className="block p-4 transition-colors first:rounded-t-3xl last:rounded-b-3xl hover:bg-surface-hover"
             >
-              <p className="font-medium">{clinicNameById.get(diagnostic.clinic_id) ?? 'Clínica'}</p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-medium">{clinicNameById.get(diagnostic.clinic_id) ?? 'Clínica'}</p>
+                <Badge tone={STATUS_TONES[diagnostic.status]}>{STATUS_LABELS[diagnostic.status]}</Badge>
+              </div>
               <p className="text-sm text-muted">
-                {monthLabel(diagnostic.period_month)} / {diagnostic.period_year} —{' '}
-                {STATUS_LABELS[diagnostic.status]}
+                {monthLabel(diagnostic.period_month)} / {diagnostic.period_year}
               </p>
             </Link>
           ))}
